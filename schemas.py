@@ -12,37 +12,53 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
-# Example schemas (replace with your own):
+# Real estate specific schemas
 
-class User(BaseModel):
+class Property(BaseModel):
     """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
+    Property listings schema
+    Collection name: "property"
+    """
+    title: str = Field(..., description="Headline/title for the property")
+    address: str = Field(..., description="Street address")
+    city: str = Field(..., description="City")
+    state: str = Field(..., description="State abbreviation")
+    zip_code: str = Field(..., description="Zip/Postal code")
+    price: int = Field(..., ge=0, description="Listing price in USD")
+    beds: int = Field(..., ge=0, description="Bedrooms")
+    baths: float = Field(..., ge=0, description="Bathrooms")
+    sqft: Optional[int] = Field(None, ge=0, description="Square footage")
+    lot_size: Optional[float] = Field(None, ge=0, description="Lot size (acres)")
+    year_built: Optional[int] = Field(None, description="Year built")
+    description: Optional[str] = Field(None, description="Long description")
+    features: Optional[List[str]] = Field(default_factory=list, description="Key features")
+    images: Optional[List[str]] = Field(default_factory=list, description="Image URLs")
+    status: str = Field("For Sale", description="Status: For Sale, Sold, Pending, Off Market")
+    type: str = Field("Single Family", description="Property type")
+
+class Inquiry(BaseModel):
+    """
+    Buyer/seller inquiry submissions
+    Collection name: "inquiry"
     """
     name: str = Field(..., description="Full name")
     email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    phone: Optional[str] = Field(None, description="Phone number")
+    message: str = Field(..., description="Message from lead")
+    property_id: Optional[str] = Field(None, description="Related property id if applicable")
+
+# Example schemas (kept for reference of structure)
+class User(BaseModel):
+    name: str
+    email: str
+    address: str
+    is_active: bool = True
 
 class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
-
-# Add your own schemas here:
-# --------------------------------------------------
-
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+    title: str
+    description: Optional[str] = None
+    price: float
+    category: str
+    in_stock: bool = True
